@@ -2,13 +2,16 @@ package services
 
 import (
 	"context"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
+	"go.uber.org/dig"
 
 	"github.com/dhany007/library-be/services/users/internal/domain"
 	"github.com/dhany007/library-be/services/users/internal/repository/postgres"
 	"github.com/dhany007/library-be/services/users/pkg/bcrypt"
-	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
-	"go.uber.org/dig"
+	"github.com/dhany007/library-be/services/users/pkg/jwt"
 )
 
 type (
@@ -19,6 +22,7 @@ type (
 
 	UsersService interface {
 		Register(ctx context.Context, req domain.RegisterRequest) (user domain.User, err error)
+		Login(ctx context.Context, req domain.LoginRequest) (token string, err error)
 	}
 )
 
@@ -60,4 +64,38 @@ func (s *UsersServiceImpl) Register(
 	}
 
 	return user, nil
+}
+
+func (s *UsersServiceImpl) Login(
+	ctx context.Context, req domain.LoginRequest,
+) (token string, err error) {
+
+	user, err := s.UsersRepository.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while UsersRepository.GetUserByEmail (email: %s)", req.Email)
+		return token, err
+	}
+
+	if user.UserID == "" {
+		log.Ctx(ctx).Err(domain.ErrUserNotFound).Msgf("user with email %s not found", req.Email)
+		return token, domain.ErrUserNotFound
+	}
+
+	if !bcrypt.ComparePassword([]byte(user.PasswordHash), []byte(req.Password)) {
+		log.Ctx(ctx).Err(domain.ErrPasswordNotMatch).Msgf("invalid password for user with email %s", req.Email)
+		return token, domain.ErrPasswordNotMatch
+	}
+
+	duration := time.Duration(domain.DurationTTLTokenMinutes * time.Minute)
+	token, err = jwt.GenerateToken(duration, domain.Authorization{
+		UserID: user.UserID,
+		Role:   user.Role,
+		Email:  user.Email,
+	})
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while generating token for user with email %s", req.Email)
+		return token, err
+	}
+
+	return token, nil
 }

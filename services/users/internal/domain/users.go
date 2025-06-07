@@ -24,8 +24,19 @@ type (
 	RegisterRequest struct {
 		UserID   string `json:"user_id" `
 		Email    string `json:"email" valid:"required,email"`
-		Password string `json:"password" valid:"required,min=8"`
-		Name     string `json:"name" valid:"required,min=3"`
+		Password string `json:"password" valid:"required,minstringlength(8)"`
+		Name     string `json:"name" valid:"required,minstringlength(3)"`
 		Role     string `json:"role" valid:"required"`
+	}
+
+	LoginRequest struct {
+		Email    string `json:"email" valid:"required,email"`
+		Password string `json:"password" valid:"required,minstringlength(8)"`
+	}
+
+	Authorization struct {
+		UserID string `json:"user_id"`
+		Role   string `json:"role"`
+		Email  string `json:"email"`
 	}
 )

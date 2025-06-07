@@ -29,7 +29,7 @@ You can access the ERP here: [dbdiagram.io](https://dbdiagram.io/d/library-be-68
     {
         "email": "dhany@gmail.com",
         "name": "dhany",
-        "password": "dhany",
+        "password": "123456789",
         "role": "admin"
     }
     ```
@@ -60,6 +60,34 @@ You can access the ERP here: [dbdiagram.io](https://dbdiagram.io/d/library-be-68
     - `data.email`: email of user
     - `data.name`: name of user
     - `data.role`: role of user
+### Login
+- Endpoint: `/v1/users/login`
+- Request Body:
+    ```
+    {
+        "email": "dhany@gmail.com",
+        "password": "123456789",
+    }
+    ```
+    - `email`: email of user
+    - `password`: password user
+- Response: 
+    ```
+    {
+        "code": 200,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRoYW55QGdtYWlsLmNvbSIsImV4cCI6ODgyMjk0MzQ1OSwiaWF0IjoxNzQ5MzAyNTI1LCJpZCI6ImQ3NzQxMDcyLTQwYzktNGE0Mi04MDU1LTUzOWRkNDcwZDkyZiIsInJvbGUiOiJhZG1pbiJ9.YgoV9BuJ4sCZ2WZokrN5hX78w6SvgUJ4Xmgu1Sfz3po"
+        }
+    }
+    ```
+    - `code`: http code of response
+    - `message.en`: message response in english
+    - `message.id`: message response in bahasa
+    - `data.token`: access token of user
 ## Books
 ### Health
 - Endpoint: `/v1/books/health`
