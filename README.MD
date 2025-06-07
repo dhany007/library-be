@@ -22,6 +22,44 @@ You can access the ERP here: [dbdiagram.io](https://dbdiagram.io/d/library-be-68
     - `message.en`: message response in english
     - `message.id`: message response in bahasa
     - `data`: data response
+### Register
+- Endpoint: `/v1/users/register`
+- Request Body:
+    ```
+    {
+        "email": "dhany@gmail.com",
+        "name": "dhany",
+        "password": "dhany",
+        "role": "admin"
+    }
+    ```
+    - `email`: email of user
+    - `name`: name of user
+    - `password`: password user
+    - `role`: role user, one of [admin, general]
+- Response: 
+    ```
+    {
+        "code": 201,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "user_id": "781cf26e-b7e7-4b63-8bb5-db040416e72b",
+            "email": "dhany@gmail.com",
+            "name": "dhany",
+            "role": "admin"
+        }
+    }
+    ```
+    - `code`: http code of response
+    - `message.en`: message response in english
+    - `message.id`: message response in bahasa
+    - `data.user_id`: user_id of user
+    - `data.email`: email of user
+    - `data.name`: name of user
+    - `data.role`: role of user
 ## Books
 ### Health
 - Endpoint: `/v1/books/health`
