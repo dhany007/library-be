@@ -94,6 +94,11 @@ func LoadApplicationRepository() error {
 		return fmt.Errorf("NewBookRepository: %s", err.Error())
 	}
 
+	err = di.Provide(postgres.NewTransactionRepo)
+	if err != nil {
+		return fmt.Errorf("NewTransactionRepo: %s", err.Error())
+	}
+
 	return nil
 }
 

@@ -17,6 +17,7 @@ type (
 		CategoryRepository postgres.CategoryRepository
 		AuthorRepository   postgres.AuthorRepository
 		BookRepository     postgres.BookRepository
+		TxRepository       postgres.TransactionRepository
 	}
 
 	BookService interface {
@@ -25,6 +26,8 @@ type (
 		SearchBooks(
 			ctx context.Context, query domain.SearchBooksRequest,
 		) (books []domain.Book, err error)
+		BorrowBook(c context.Context, req domain.BorrowBookRequest) (err error)
+		ReturnBook(ctx context.Context, req domain.BorrowBookRequest) (err error)
 	}
 )
 
@@ -112,4 +115,80 @@ func (s *BookServiceImpl) SearchBooks(
 	}
 
 	return books, nil
+}
+
+func (s *BookServiceImpl) BorrowBook(ctx context.Context, req domain.BorrowBookRequest) (err error) {
+	tx, err := s.TxRepository.BeginTx()
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while TxRepository.BeginTx")
+		return err
+	}
+	defer s.TxRepository.RollbackTx(tx)
+
+	book, err := s.BookRepository.SelectBookForUpdate(ctx, tx, req.BookID)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while BookRepository.SelectBookForUpdate (bookID: %s)", req.BookID)
+		return err
+	}
+
+	if book.BookID == "" {
+		err = domain.ErrBookNotFound
+		log.Ctx(ctx).Err(err).Msgf("book not found (bookID: %s)", req.BookID)
+		return err
+	}
+
+	if book.Stock <= 0 {
+		err = domain.ErrStockBookEmpty
+		log.Ctx(ctx).Err(err).Msgf("stock book is empty (bookID: %s)", req.BookID)
+		return err
+	}
+
+	err = s.BookRepository.UpdateStockBook(ctx, tx, book.BookID, book.Stock-1)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while UpdateStockBook (bookID: %s)", req.BookID)
+		return err
+	}
+
+	err = s.TxRepository.CommitTx(tx)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while TxRepository.CommitTx")
+		return err
+	}
+
+	return nil
+}
+
+func (s *BookServiceImpl) ReturnBook(ctx context.Context, req domain.BorrowBookRequest) (err error) {
+	tx, err := s.TxRepository.BeginTx()
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while TxRepository.BeginTx")
+		return err
+	}
+	defer s.TxRepository.RollbackTx(tx)
+
+	book, err := s.BookRepository.SelectBookForUpdate(ctx, tx, req.BookID)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while BookRepository.SelectBookForUpdate (bookID: %s)", req.BookID)
+		return err
+	}
+
+	if book.BookID == "" {
+		err = domain.ErrBookNotFound
+		log.Ctx(ctx).Err(err).Msgf("book not found (bookID: %s)", req.BookID)
+		return err
+	}
+
+	err = s.BookRepository.UpdateStockBook(ctx, tx, book.BookID, book.Stock+1)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while UpdateStockBook (bookID: %s)", req.BookID)
+		return err
+	}
+
+	err = s.TxRepository.CommitTx(tx)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while TxRepository.CommitTx")
+		return err
+	}
+
+	return nil
 }

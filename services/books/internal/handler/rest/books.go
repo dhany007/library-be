@@ -22,6 +22,8 @@ type (
 		CreateBook(c echo.Context) (err error)
 		GetBookByID(c echo.Context) (err error)
 		SearchBooks(c echo.Context) (err error)
+		BorrowBook(c echo.Context) (err error)
+		ReturnBook(c echo.Context) (err error)
 	}
 )
 
@@ -94,4 +96,50 @@ func (h *BookControllerImpl) SearchBooks(c echo.Context) (err error) {
 	log.Ctx(ctx).Info().Msgf("found %d books for query: %s", len(books), query)
 
 	return ResultWithData(c, http.StatusOK, books)
+}
+
+func (h *BookControllerImpl) BorrowBook(c echo.Context) (err error) {
+	ctx := c.Request().Context()
+
+	var req domain.BorrowBookRequest
+	if err := c.Bind(&req); err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while bind request body (book_id: %s, user_id: %s)", req.BookID, req.UserID)
+		return ResultError(c, http.StatusBadRequest, err)
+	}
+
+	if _, err := govalidator.ValidateStruct(&req); err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while validate request body (book_id: %s, user_id: %s)", req.BookID, req.UserID)
+		return ResultError(c, http.StatusUnprocessableEntity, err)
+	}
+
+	err = h.BookService.BorrowBook(ctx, req)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while borrowing book (book_id: %s, user_id: %s)", req.BookID, req.UserID)
+		return ResultError(c, http.StatusInternalServerError, err)
+	}
+
+	return DefaultResult(c, http.StatusOK)
+}
+
+func (h *BookControllerImpl) ReturnBook(c echo.Context) (err error) {
+	ctx := c.Request().Context()
+
+	var req domain.BorrowBookRequest
+	if err := c.Bind(&req); err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while bind request body (book_id: %s, user_id: %s)", req.BookID, req.UserID)
+		return ResultError(c, http.StatusBadRequest, err)
+	}
+
+	if _, err := govalidator.ValidateStruct(&req); err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while validate request body (book_id: %s, user_id: %s)", req.BookID, req.UserID)
+		return ResultError(c, http.StatusUnprocessableEntity, err)
+	}
+
+	err = h.BookService.ReturnBook(ctx, req)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while returning book (book_id: %s, user_id: %s)", req.BookID, req.UserID)
+		return ResultError(c, http.StatusInternalServerError, err)
+	}
+
+	return DefaultResult(c, http.StatusOK)
 }

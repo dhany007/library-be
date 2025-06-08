@@ -44,6 +44,11 @@ type (
 		AuthorID   string `json:"author_id"`
 		CategoryID string `json:"category_id"`
 	}
+
+	BorrowBookRequest struct {
+		BookID string `json:"book_id" valid:"required,uuid"`
+		UserID string `json:"user_id" valid:"required,uuid"`
+	}
 )
 
 func (b *BookScanner) ToBook() Book {

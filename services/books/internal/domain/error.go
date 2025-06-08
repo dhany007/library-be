@@ -10,4 +10,5 @@ var (
 	ErrInvalidBookIDFormat     error = errors.New("invalid book ID format")
 	ErrBookNotFound            error = errors.New("book not found")
 	ErrISBNAlreadyExists       error = errors.New("ISBN already exists")
+	ErrStockBookEmpty          error = errors.New("stock book is empty")
 )

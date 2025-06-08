@@ -76,4 +76,26 @@ const (
 		WHERE
 			b.is_active = 1::BIT
 	`
+
+	QuerySelectBookForUpdate = `		
+		SELECT 
+			b.id AS book_id,
+			b.title,
+			b.isbn,
+			b.stock,
+			b.description
+		FROM books.books b 
+		WHERE
+			b.is_active = 1::BIT
+			AND b.id = $1
+		FOR UPDATE
+	`
+
+	QueryUpdateStockBook = `		
+		UPDATE books.books
+		SET stock = $2
+		WHERE
+			is_active = 1::BIT
+			AND id = $1
+	`
 )

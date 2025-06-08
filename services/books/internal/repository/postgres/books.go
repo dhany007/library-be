@@ -24,6 +24,10 @@ type (
 		SearchBooks(
 			ctx context.Context, query domain.SearchBooksRequest,
 		) (books []domain.Book, err error)
+		SelectBookForUpdate(
+			ctx context.Context, tx *sql.Tx, bookID string,
+		) (book domain.Book, err error)
+		UpdateStockBook(ctx context.Context, tx *sql.Tx, bookID string, stok int32) error
 	}
 )
 
@@ -160,4 +164,44 @@ func (r *BookRepositoryImpl) SearchBooks(
 	}
 
 	return books, nil
+}
+
+func (r *BookRepositoryImpl) SelectBookForUpdate(
+	ctx context.Context, tx *sql.Tx, bookID string,
+) (book domain.Book, err error) {
+	rows, err := tx.QueryContext(ctx, QuerySelectBookForUpdate, bookID)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while executing query QueryGetBookByID (bookID: %s)", bookID)
+		return book, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var scanner domain.BookScanner
+		err = rows.Scan(
+			&scanner.BookID,
+			&scanner.Title,
+			&scanner.ISBN,
+			&scanner.Stock,
+			&scanner.Description,
+		)
+		if err != nil {
+			log.Ctx(ctx).Err(err).Msg("while scanning row in GetBookByID")
+			return book, err
+		}
+
+		book = scanner.ToBook()
+	}
+
+	return book, nil
+}
+
+func (r BookRepositoryImpl) UpdateStockBook(ctx context.Context, tx *sql.Tx, bookID string, stok int32) error {
+	_, err := tx.ExecContext(ctx, QueryUpdateStockBook, bookID, stok)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while ExecContext QueryUpdateStockBook (bookID: %s)", bookID)
+		return err
+	}
+
+	return nil
 }
