@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,8 +11,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
 
+	"github.com/dhany007/library-be/proto/bookpb"
+	grpcHandler "github.com/dhany007/library-be/services/books/internal/handler/grpc"
 	"github.com/dhany007/library-be/services/books/internal/infra"
+	"github.com/dhany007/library-be/services/books/internal/services"
 	"github.com/dhany007/library-be/services/books/pkg/di"
 )
 
@@ -23,7 +28,9 @@ func Start() {
 
 	go func() {
 		defer func() { exitCh <- syscall.SIGTERM }()
-		if err := di.Invoke(startApp); err != nil {
+		if err := di.Invoke(func(e *echo.Echo, cfg *infra.AppCfg, bookSvc services.BookService) error {
+			return startApp(e, cfg, bookSvc)
+		}); err != nil {
 			log.Fatal().Msgf("startApp: %s", err.Error())
 		}
 	}()
@@ -34,7 +41,11 @@ func Start() {
 	}
 }
 
-func startApp(echo *echo.Echo, appCfg *infra.AppCfg) error {
+func startApp(echo *echo.Echo, appCfg *infra.AppCfg, bookSvc services.BookService) error {
+	go func() {
+		startGRPCServer(bookSvc)
+	}()
+
 	if err := di.Invoke(setRoute); err != nil {
 		return err
 	}
@@ -58,4 +69,19 @@ func gracefulShutdown(e *echo.Echo) {
 	}
 
 	log.Info().Msg("server gracefully stopped")
+}
+
+func startGRPCServer(svc services.BookService) {
+	lis, err := net.Listen("tcp", ":50052")
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to listen on :50052")
+	}
+
+	grpcServer := grpc.NewServer()
+	bookpb.RegisterBookServiceServer(grpcServer, grpcHandler.NewBookGRPCHandler(svc))
+
+	log.Info().Msg("gRPC server running on :50052")
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatal().Err(err).Msg("gRPC server error")
+	}
 }
