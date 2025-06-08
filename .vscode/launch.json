@@ -6,7 +6,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/services/users/cmd/main.go",
+      "program": "${workspaceFolder}/services/books/cmd/main.go",
       "showLog": true,
       "debugAdapter": "legacy",
       "envFile": "${workspaceFolder}/.env",

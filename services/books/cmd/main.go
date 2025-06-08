@@ -9,6 +9,8 @@ import (
 	app "github.com/dhany007/library-be/services/books/internal"
 	"github.com/dhany007/library-be/services/books/internal/handler/rest"
 	"github.com/dhany007/library-be/services/books/internal/infra"
+	"github.com/dhany007/library-be/services/books/internal/repository/postgres"
+	"github.com/dhany007/library-be/services/books/internal/services"
 	"github.com/dhany007/library-be/services/books/pkg/di"
 )
 
@@ -28,6 +30,16 @@ func main() {
 		log.Fatal().Msg(err.Error())
 	}
 
+	err = LoadApplicationRepository()
+	if err != nil {
+		log.Fatal().Msg(err.Error())
+	}
+
+	err = LoadApplicationService()
+	if err != nil {
+		log.Fatal().Msg(err.Error())
+	}
+
 	err = LoadApplicationController()
 	if err != nil {
 		log.Fatal().Msg(err.Error())
@@ -43,6 +55,10 @@ func LoadApplicationConfig() error {
 		return fmt.Errorf("LoadAppCfg: %s", err.Error())
 	}
 
+	err = di.Provide(infra.LoadDatabaseCfg)
+	if err != nil {
+		return fmt.Errorf("LoadDatabaseCfg: %s", err.Error())
+	}
 	return nil
 }
 
@@ -53,6 +69,31 @@ func LoadApplicationPackage() error {
 		return fmt.Errorf("NewEcho: %s", err.Error())
 	}
 
+	err = di.Provide(infra.NewDatabases)
+	if err != nil {
+		return fmt.Errorf("NewDatabases: %s", err.Error())
+	}
+
+	return nil
+}
+
+// LoadApplicationRepository load repository using ubed dig
+func LoadApplicationRepository() error {
+	err := di.Provide(postgres.NewAuthorRepository)
+	if err != nil {
+		return fmt.Errorf("NewAuthorRepository: %s", err.Error())
+	}
+
+	return nil
+}
+
+// LoadApplicationService Load service or usecase of the application using uber dig
+func LoadApplicationService() error {
+	err := di.Provide(services.NewAuthorService)
+	if err != nil {
+		return fmt.Errorf("NewAuthorService: %s", err.Error())
+	}
+
 	return nil
 }
 
@@ -61,6 +102,11 @@ func LoadApplicationController() error {
 	err := di.Provide(rest.NewHealthHandler)
 	if err != nil {
 		return fmt.Errorf("NewHealthHandler: %s", err.Error())
+	}
+
+	err = di.Provide(rest.NewAuthorHandler)
+	if err != nil {
+		return fmt.Errorf("NewAuthorHandler: %s", err.Error())
 	}
 
 	return nil

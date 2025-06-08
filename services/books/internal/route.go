@@ -10,8 +10,16 @@ const (
 	ContextPath = "/v1/books/"
 
 	HealthCheckPath = ContextPath + "health"
+
+	CreateAuthor = ContextPath + "authors"
 )
 
-func setRoute(e *echo.Echo, h rest.HealthController) {
-	e.GET(HealthCheckPath, h.HealthCheck)
+func setRoute(
+	e *echo.Echo,
+	health rest.HealthController,
+	author rest.AuthorController,
+) {
+	e.GET(HealthCheckPath, health.HealthCheck)
+
+	e.POST(CreateAuthor, author.CreateAuthor)
 }

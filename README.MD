@@ -107,3 +107,35 @@ You can access the ERP here: [dbdiagram.io](https://dbdiagram.io/d/library-be-68
     - `message.en`: message response in english
     - `message.id`: message response in bahasa
     - `data`: data response
+### Create Author
+- Endpoint: `/v1/books/authors`
+- Request Body:
+    ```
+    {
+        "name": "eka kurniawan",
+        "biography": ""
+    }
+    ```
+    - `name`: name of author
+    - `biography`: biography of author
+- Response: 
+    ```
+    {
+        "code": 201,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "author_id": "e4ceb944-e0a4-41c8-a53b-5e0f2f545439",
+            "name": "eka kurniawan",
+            "biography": ""
+        }
+    }
+    ```
+    - `code`: http code of response
+    - `message.en`: message response in english
+    - `message.id`: message response in bahasa
+    - `data.author_id`: author_id of author
+    - `data.name`: name of author
+    - `data.biography`: biography of author
