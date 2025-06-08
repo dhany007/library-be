@@ -164,3 +164,60 @@ You can access the ERP here: [dbdiagram.io](https://dbdiagram.io/d/library-be-68
     - `data.author_id`: author_id of author
     - `data.name`: name of author
     - `data.biography`: biography of author
+### Create Category
+- Endpoint: `/v1/books/categories`
+- Request Body:
+    ```
+    {
+        "name": "fiksi",
+        "description": "ini adalah fiksi"
+    }
+    ```
+    - `name`: name of category
+    - `description`: description of category
+- Response: 
+    ```
+    {
+        "code": 201,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "category_id": "636de519-e721-462f-9311-be1e67b40f5f",
+            "name": "fiksi",
+            "description": "ini adalah fiksi"
+        }
+    }
+    ```
+    - `code`: http code of response
+    - `message.en`: message response in english
+    - `message.id`: message response in bahasa
+    - `data.category_id`: category_id of category
+    - `data.name`: name of category
+    - `data.description`: description of category
+### Get Category By ID
+- Endpoint: `/v1/books/categories/:id`
+- Request Param:
+    - `id`: id of category
+- Response: 
+    ```
+    {
+        "code": 200,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "category_id": "636de519-e721-462f-9311-be1e67b40f5f",
+            "name": "fiksi",
+            "description": "ini adalah fiksi"
+        }
+    }
+    ```
+    - `code`: http code of response
+    - `message.en`: message response in english
+    - `message.id`: message response in bahasa
+    - `data.category_id`: category_id of category
+    - `data.name`: name of category
+    - `data.description`: description of category

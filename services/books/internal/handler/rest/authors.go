@@ -58,8 +58,10 @@ func (h *AuthorControllerImpl) GetAuthorByID(c echo.Context) (err error) {
 	ctx := c.Request().Context()
 
 	authorID := c.Param("id")
-	if authorID == "" {
-		return ResultError(c, http.StatusBadRequest, domain.ErrInvalidAuthorID)
+	if isUUID := govalidator.IsUUID(authorID); !isUUID {
+		err = domain.ErrInvalidAuthorID
+		log.Ctx(ctx).Err(err).Msgf("invalid author ID format (id: %s)", authorID)
+		return ResultError(c, http.StatusBadRequest, err)
 	}
 
 	author, err := h.AuthorService.GetAuthorByID(ctx, authorID)

@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/dhany007/library-be/services/books/internal/domain"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
+
+	"github.com/dhany007/library-be/services/books/internal/domain"
 )
 
 type (

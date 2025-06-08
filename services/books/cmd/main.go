@@ -84,6 +84,11 @@ func LoadApplicationRepository() error {
 		return fmt.Errorf("NewAuthorRepository: %s", err.Error())
 	}
 
+	err = di.Provide(postgres.NewCategoryRepository)
+	if err != nil {
+		return fmt.Errorf("NewCategoryRepository: %s", err.Error())
+	}
+
 	return nil
 }
 
@@ -92,6 +97,11 @@ func LoadApplicationService() error {
 	err := di.Provide(services.NewAuthorService)
 	if err != nil {
 		return fmt.Errorf("NewAuthorService: %s", err.Error())
+	}
+
+	err = di.Provide(services.NewCategoryService)
+	if err != nil {
+		return fmt.Errorf("NewCategoryService: %s", err.Error())
 	}
 
 	return nil
@@ -107,6 +117,11 @@ func LoadApplicationController() error {
 	err = di.Provide(rest.NewAuthorHandler)
 	if err != nil {
 		return fmt.Errorf("NewAuthorHandler: %s", err.Error())
+	}
+
+	err = di.Provide(rest.NewCategoryHandler)
+	if err != nil {
+		return fmt.Errorf("NewCategoryHandler: %s", err.Error())
 	}
 
 	return nil
