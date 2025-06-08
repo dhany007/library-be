@@ -17,7 +17,7 @@ type (
 	}
 
 	AuthorRepository interface {
-		CreateAuthor(ctx context.Context, req domain.Author) (err error)
+		CreateAuthor(ctx context.Context, req domain.AuthorRequest) (err error)
 		GetAuthorByID(ctx context.Context, authorID string) (author domain.Author, err error)
 	}
 )
@@ -26,11 +26,12 @@ func NewAuthorRepository(impl AuthorRepositoryImpl) AuthorRepository {
 	return &impl
 }
 
-func (r *AuthorRepositoryImpl) CreateAuthor(ctx context.Context, req domain.Author) (err error) {
+func (r *AuthorRepositoryImpl) CreateAuthor(ctx context.Context, req domain.AuthorRequest) (err error) {
 	arguments := []interface{}{
 		req.AuthorID,
 		req.Name,
 		req.Biography,
+		req.CreatedBy,
 	}
 
 	_, err = r.DB.ExecContext(ctx, QueryCreateAuthor, arguments...)

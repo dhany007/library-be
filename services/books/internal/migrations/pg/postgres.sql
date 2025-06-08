@@ -37,6 +37,7 @@ CREATE TABLE books.books (
   stock INT,
   author_id UUID REFERENCES books.authors(id),
   category_id UUID REFERENCES books.categories(id),
+  description TEXT,
   is_active BIT,
   created_by VARCHAR,
   updated_by VARCHAR,

@@ -17,7 +17,7 @@ type (
 	}
 
 	CategoryRepository interface {
-		CreateCategory(ctx context.Context, req domain.Category) (err error)
+		CreateCategory(ctx context.Context, req domain.CategoryRequest) (err error)
 		GetCategoryByID(ctx context.Context, id string) (category domain.Category, err error)
 	}
 )
@@ -26,11 +26,12 @@ func NewCategoryRepository(impl CategoryRepositoryImpl) CategoryRepository {
 	return &impl
 }
 
-func (r *CategoryRepositoryImpl) CreateCategory(ctx context.Context, req domain.Category) (err error) {
+func (r *CategoryRepositoryImpl) CreateCategory(ctx context.Context, req domain.CategoryRequest) (err error) {
 	arguments := []interface{}{
 		req.CategoryID,
 		req.Name,
 		req.Description,
+		req.CreatedBy,
 	}
 
 	_, err = r.DB.ExecContext(ctx, QueryCreateCategory, arguments...)

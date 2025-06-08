@@ -16,7 +16,9 @@ type (
 	}
 
 	AuthorRequest struct {
+		AuthorID  string
 		Name      string `json:"name" valid:"required,minstringlength(3)"`
 		Biography string `json:"biography"`
+		CreatedBy string
 	}
 )

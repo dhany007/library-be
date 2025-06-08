@@ -16,7 +16,9 @@ type (
 	}
 
 	CategoryRequest struct {
+		CategoryID  string
 		Name        string `json:"name" valid:"required,minstringlength(3)"`
 		Description string `json:"description"`
+		CreatedBy   string
 	}
 )

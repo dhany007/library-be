@@ -31,17 +31,18 @@ func (s *AuthorServiceImpl) CreateAuthor(
 	ctx context.Context, req domain.AuthorRequest,
 ) (author domain.Author, err error) {
 	authorID := uuid.New().String()
+	req.AuthorID = authorID
+
+	err = s.AuthorRepository.CreateAuthor(ctx, req)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while AuthorRepository.CreateAuthor (authorID: %s)", authorID)
+		return author, err
+	}
 
 	author = domain.Author{
 		AuthorID:  authorID,
 		Name:      req.Name,
 		Biography: req.Biography,
-	}
-
-	err = s.AuthorRepository.CreateAuthor(ctx, author)
-	if err != nil {
-		log.Ctx(ctx).Err(err).Msgf("while AuthorRepository.CreateAuthor (authorID: %s)", authorID)
-		return author, err
 	}
 
 	return author, nil
