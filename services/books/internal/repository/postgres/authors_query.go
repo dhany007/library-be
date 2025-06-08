@@ -23,4 +23,15 @@ const (
 			$2
 		)
 	`
+
+	QueryGetAuthorByID = `		
+		SELECT
+			id,
+			name,
+			bio
+		FROM books.authors
+		WHERE
+			id = $1
+			AND is_active = 1::BIT
+	`
 )

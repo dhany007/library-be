@@ -11,7 +11,8 @@ const (
 
 	HealthCheckPath = ContextPath + "health"
 
-	CreateAuthor = ContextPath + "authors"
+	CreateAuthor  = ContextPath + "authors"
+	GetAuthorByID = ContextPath + "authors/:id"
 )
 
 func setRoute(
@@ -22,4 +23,5 @@ func setRoute(
 	e.GET(HealthCheckPath, health.HealthCheck)
 
 	e.POST(CreateAuthor, author.CreateAuthor)
+	e.GET(GetAuthorByID, author.GetAuthorByID)
 }

@@ -21,6 +21,7 @@ type (
 
 	AuthorController interface {
 		CreateAuthor(c echo.Context) (err error)
+		GetAuthorByID(c echo.Context) (err error)
 	}
 )
 
@@ -51,4 +52,27 @@ func (h *AuthorControllerImpl) CreateAuthor(c echo.Context) (err error) {
 	log.Ctx(ctx).Info().Msgf("author %s created successfully", author.AuthorID)
 
 	return ResultWithData(c, http.StatusCreated, author)
+}
+
+func (h *AuthorControllerImpl) GetAuthorByID(c echo.Context) (err error) {
+	ctx := c.Request().Context()
+
+	authorID := c.Param("id")
+	if authorID == "" {
+		return ResultError(c, http.StatusBadRequest, domain.ErrInvalidAuthorID)
+	}
+
+	author, err := h.AuthorService.GetAuthorByID(ctx, authorID)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while get author by id (id: %s)", authorID)
+		if err == domain.ErrAuthorNotFound {
+			return ResultError(c, http.StatusNotFound, err)
+		}
+
+		return ResultError(c, http.StatusInternalServerError, err)
+	}
+
+	log.Ctx(ctx).Info().Msgf("author %s retrieved successfully", author.AuthorID)
+
+	return ResultWithData(c, http.StatusOK, author)
 }

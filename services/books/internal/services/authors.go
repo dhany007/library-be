@@ -19,6 +19,7 @@ type (
 
 	AuthorService interface {
 		CreateAuthor(ctx context.Context, req domain.AuthorRequest) (author domain.Author, err error)
+		GetAuthorByID(ctx context.Context, authorID string) (author domain.Author, err error)
 	}
 )
 
@@ -40,6 +41,22 @@ func (s *AuthorServiceImpl) CreateAuthor(
 	err = s.AuthorRepository.CreateAuthor(ctx, author)
 	if err != nil {
 		log.Ctx(ctx).Err(err).Msgf("while AuthorRepository.CreateAuthor (authorID: %s)", authorID)
+		return author, err
+	}
+
+	return author, nil
+}
+
+func (s *AuthorServiceImpl) GetAuthorByID(ctx context.Context, authorID string) (author domain.Author, err error) {
+	author, err = s.AuthorRepository.GetAuthorByID(ctx, authorID)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while AuthorRepository.GetAuthorByID (authorID: %s)", authorID)
+		return author, err
+	}
+
+	if author.AuthorID == "" {
+		err = domain.ErrAuthorNotFound
+		log.Ctx(ctx).Err(err).Msgf("author not found (authorID: %s)", authorID)
 		return author, err
 	}
 

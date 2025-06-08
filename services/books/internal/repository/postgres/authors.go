@@ -17,6 +17,7 @@ type (
 
 	AuthorRepository interface {
 		CreateAuthor(ctx context.Context, req domain.Author) (err error)
+		GetAuthorByID(ctx context.Context, authorID string) (author domain.Author, err error)
 	}
 )
 
@@ -38,4 +39,36 @@ func (r *AuthorRepositoryImpl) CreateAuthor(ctx context.Context, req domain.Auth
 	}
 
 	return nil
+}
+
+func (r *AuthorRepositoryImpl) GetAuthorByID(
+	ctx context.Context, authorID string,
+) (author domain.Author, err error) {
+	rows, err := r.DB.QueryContext(ctx, QueryGetAuthorByID, authorID)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while executing query QueryGetAuthorByID (authorID: %s)", authorID)
+		return author, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var scanner domain.AuthorScanner
+		err = rows.Scan(
+			&scanner.AuthorID,
+			&scanner.Name,
+			&scanner.Biography,
+		)
+		if err != nil {
+			log.Ctx(ctx).Err(err).Msgf("while scanning row in QueryGetAuthorByID (authorID: %s)", authorID)
+			return author, err
+		}
+
+		author = domain.Author{
+			AuthorID:  scanner.AuthorID.String,
+			Name:      scanner.Name.String,
+			Biography: scanner.Biography.String,
+		}
+	}
+
+	return author, nil
 }
