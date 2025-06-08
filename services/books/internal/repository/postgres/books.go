@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
@@ -19,6 +21,9 @@ type (
 	BookRepository interface {
 		CreateBook(ctx context.Context, req domain.BookRequest) (err error)
 		GetBookByID(ctx context.Context, bookID string) (book domain.Book, err error)
+		SearchBooks(
+			ctx context.Context, query domain.SearchBooksRequest,
+		) (books []domain.Book, err error)
 	}
 )
 
@@ -81,4 +86,78 @@ func (r *BookRepositoryImpl) GetBookByID(
 	}
 
 	return book, nil
+}
+
+func (r *BookRepositoryImpl) SearchBooks(
+	ctx context.Context, query domain.SearchBooksRequest,
+) (books []domain.Book, err error) {
+	var (
+		filters []string
+		args    []interface{}
+		idx     = 1
+	)
+
+	if query.Title != "" {
+		filters = append(filters, fmt.Sprintf("LOWER(b.title) ILIKE $%d", idx))
+		args = append(args, "%"+strings.ToLower(query.Title)+"%")
+		idx++
+	}
+
+	if query.ISBN != "" {
+		filters = append(filters, fmt.Sprintf("LOWER(b.isbn) = $%d", idx))
+		args = append(args, strings.ToLower(query.ISBN))
+		idx++
+	}
+
+	if query.AuthorID != "" {
+		filters = append(filters, fmt.Sprintf("LOWER(a.id) = $%d", idx))
+		args = append(args, strings.ToLower(query.AuthorID))
+		idx++
+	}
+
+	if query.CategoryID != "" {
+		filters = append(filters, fmt.Sprintf("LOWER(c.id) = $%d", idx))
+		args = append(args, strings.ToLower(query.CategoryID))
+		idx++
+	}
+
+	q := QuerySearchBooks
+	if len(filters) > 0 {
+		q += " AND " + strings.Join(filters, " AND ")
+	}
+
+	rows, err := r.DB.QueryContext(ctx, q, args...)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msg("while executing query QuerySearchBooks")
+		return books, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var scanner domain.BookScanner
+		err = rows.Scan(
+			&scanner.BookID,
+			&scanner.Title,
+			&scanner.ISBN,
+			&scanner.Stock,
+			&scanner.Description,
+			&scanner.AuthorID,
+			&scanner.AuthorName,
+			&scanner.Biography,
+			&scanner.CategoryID,
+			&scanner.CategoryName,
+			&scanner.CategoryDescription,
+		)
+		if err != nil {
+			log.Ctx(ctx).Err(err).Msg("while scanning row in SearchBooks")
+			return books, err
+		}
+
+		book := scanner.ToBook()
+		if book.BookID != "" {
+			books = append(books, book)
+		}
+	}
+
+	return books, nil
 }

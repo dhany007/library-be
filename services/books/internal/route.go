@@ -19,6 +19,7 @@ const (
 
 	CreateBook  = ContextPath + "books"
 	GetBookByID = ContextPath + "books/:id"
+	SearchBooks = ContextPath + "books/search"
 )
 
 func setRoute(
@@ -38,4 +39,5 @@ func setRoute(
 
 	e.POST(CreateBook, book.CreateBook)
 	e.GET(GetBookByID, book.GetBookByID)
+	e.GET(SearchBooks, book.SearchBooks)
 }

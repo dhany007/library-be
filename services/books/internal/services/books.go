@@ -22,6 +22,9 @@ type (
 	BookService interface {
 		CreateBook(ctx context.Context, req domain.BookRequest) (book domain.Book, err error)
 		GetBookByID(ctx context.Context, id string) (book domain.Book, err error)
+		SearchBooks(
+			ctx context.Context, query domain.SearchBooksRequest,
+		) (books []domain.Book, err error)
 	}
 )
 
@@ -91,4 +94,22 @@ func (s *BookServiceImpl) GetBookByID(
 	}
 
 	return book, nil
+}
+
+func (s *BookServiceImpl) SearchBooks(
+	ctx context.Context, query domain.SearchBooksRequest,
+) (books []domain.Book, err error) {
+	books, err = s.BookRepository.SearchBooks(ctx, query)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while BookRepository.SearchBooks (query: %+v)", query)
+		return books, err
+	}
+
+	if len(books) == 0 {
+		err = domain.ErrBookNotFound
+		log.Ctx(ctx).Err(err).Msgf("no books found for query: %+v", query)
+		return books, err
+	}
+
+	return books, nil
 }

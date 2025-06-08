@@ -37,6 +37,13 @@ type (
 		CategoryID  string `json:"category_id" valid:"required,uuid"`
 		CreatedBy   string
 	}
+
+	SearchBooksRequest struct {
+		Title      string `json:"title"`
+		ISBN       string `json:"isbn"`
+		AuthorID   string `json:"author_id"`
+		CategoryID string `json:"category_id"`
+	}
 )
 
 func (b *BookScanner) ToBook() Book {

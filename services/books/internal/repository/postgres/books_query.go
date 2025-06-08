@@ -54,4 +54,26 @@ const (
 			b.is_active = 1::BIT
 			AND b.id = $1
 	`
+
+	QuerySearchBooks = `		
+		SELECT 
+			b.id AS book_id,
+			b.title,
+			b.isbn,
+			b.stock,
+			b.description,
+			a.id AS author_id,
+			a."name" AS author_name,
+			a.bio AS author_bio,
+			c.id AS category_id,
+			c."name" AS category_name,
+			c.description AS category_description
+		FROM books.books b 
+		JOIN books.categories c 
+			ON b.category_id = c.id AND c.is_active = 1::BIT
+		JOIN books.authors a 
+			ON b.author_id = a.id AND a.is_active = 1::BIT
+		WHERE
+			b.is_active = 1::BIT
+	`
 )

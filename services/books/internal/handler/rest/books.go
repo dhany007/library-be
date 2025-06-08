@@ -21,6 +21,7 @@ type (
 	BookController interface {
 		CreateBook(c echo.Context) (err error)
 		GetBookByID(c echo.Context) (err error)
+		SearchBooks(c echo.Context) (err error)
 	}
 )
 
@@ -72,4 +73,25 @@ func (h *BookControllerImpl) GetBookByID(c echo.Context) (err error) {
 	log.Ctx(ctx).Info().Msgf("book %s retrieved successfully", book.BookID)
 
 	return ResultWithData(c, http.StatusOK, book)
+}
+
+func (h *BookControllerImpl) SearchBooks(c echo.Context) (err error) {
+	ctx := c.Request().Context()
+
+	query := domain.SearchBooksRequest{
+		Title:      c.QueryParam("title"),
+		ISBN:       c.QueryParam("isbn"),
+		AuthorID:   c.QueryParam("author_id"),
+		CategoryID: c.QueryParam("category_id"),
+	}
+
+	books, err := h.BookService.SearchBooks(ctx, query)
+	if err != nil {
+		log.Ctx(ctx).Err(err).Msgf("while searching books with query: %s", query)
+		return ResultError(c, http.StatusInternalServerError, err)
+	}
+
+	log.Ctx(ctx).Info().Msgf("found %d books for query: %s", len(books), query)
+
+	return ResultWithData(c, http.StatusOK, books)
 }
