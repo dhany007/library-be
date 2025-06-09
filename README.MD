@@ -1,3 +1,10 @@
+# Todo
+Not implemented yet:
+- [ ] Transaction book in service transaction (should call grpc borrow/return books)
+- [ ] Add redis in get category and get author
+- [ ] Testing for each handler and services
+- [ ] Deployment using Docker
+
 # ERP
 You can access the ERP here: [dbdiagram.io](https://dbdiagram.io/d/library-be-68417b95ba2a4ac57bf9e159)
 ![ERP](assets/img/erp.png)
@@ -227,3 +234,109 @@ pleases make in differen terminal in root project folder
     - `data.category_id`: category_id of category
     - `data.name`: name of category
     - `data.description`: description of category
+### Create Books
+- Endpoint: `/v1/books`
+- Request Body:
+    ```
+    {
+        "title": "donxuito",
+        "isbn": "1234567892",
+        "stock": 10,
+        "description": "ini adalah deskripsi buku",
+        "author_id": "e4ceb944-e0a4-41c8-a53b-5e0f2f545439",
+        "category_id": "636de519-e721-462f-9311-be1e67b40f5f"
+    }
+    ```
+- Response: 
+    ```
+    {
+        "code": 201,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "book_id": "4532ff53-d069-41f4-bdfd-27a7803bf5e0",
+            "title": "cantik itu luka",
+            "isbn": "1234567890",
+            "stock": 10,
+            "description": "ini adalah deskripsi buku",
+            "author": {
+                "author_id": "e4ceb944-e0a4-41c8-a53b-5e0f2f545439",
+                "name": "eka kurniawan",
+                "biography": ""
+            },
+            "category": {
+                "category_id": "636de519-e721-462f-9311-be1e67b40f5f",
+                "name": "fiksi",
+                "description": "ini adalah fiksi"
+            }
+        }
+    }
+    ```
+
+### Get Book By ID
+- Endpoint: `/v1/books/:id`
+- Request Param:
+    - `id`: id of book
+- Response: 
+    ```
+    {
+        "code": 200,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": {
+            "book_id": "4532ff53-d069-41f4-bdfd-27a7803bf5e0",
+            "title": "cantik itu luka",
+            "isbn": "1234567890",
+            "stock": 10,
+            "description": "ini adalah deskripsi buku",
+            "author": {
+                "author_id": "e4ceb944-e0a4-41c8-a53b-5e0f2f545439",
+                "name": "eka kurniawan",
+                "biography": ""
+            },
+            "category": {
+                "category_id": "636de519-e721-462f-9311-be1e67b40f5f",
+                "name": "fiksi",
+                "description": "ini adalah fiksi"
+            }
+        }
+    }
+    ```
+### Search Books
+- Endpoint: `/v1/books/search?title=lau&isbn=1234567891&author_id&category_id`
+- Query Param:
+    - `title`: title of book
+    - `isbn`: isbn of book
+    - `author_id`: author_id of book
+    - `category_id`: category_id of book
+- Response: 
+    ```
+    {
+        "code": 200,
+        "message": {
+            "en": "Success",
+            "id": "Berhasil"
+        },
+        "data": [{
+            "book_id": "4532ff53-d069-41f4-bdfd-27a7803bf5e0",
+            "title": "cantik itu luka",
+            "isbn": "1234567890",
+            "stock": 10,
+            "description": "ini adalah deskripsi buku",
+            "author": {
+                "author_id": "e4ceb944-e0a4-41c8-a53b-5e0f2f545439",
+                "name": "eka kurniawan",
+                "biography": ""
+            },
+            "category": {
+                "category_id": "636de519-e721-462f-9311-be1e67b40f5f",
+                "name": "fiksi",
+                "description": "ini adalah fiksi"
+            }
+        }]
+    }
+    ```
