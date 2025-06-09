@@ -4,6 +4,7 @@ import (
 	echo "github.com/labstack/echo/v4"
 
 	"github.com/dhany007/library-be/services/books/internal/handler/rest"
+	em "github.com/dhany007/library-be/services/books/internal/middleware"
 )
 
 const (
@@ -34,16 +35,16 @@ func setRoute(
 ) {
 	e.GET(HealthCheckPath, health.HealthCheck)
 
-	e.POST(CreateAuthor, author.CreateAuthor)
-	e.GET(GetAuthorByID, author.GetAuthorByID)
+	e.POST(CreateAuthor, em.AuthMiddleware(em.AdminOnlyMiddleware(author.CreateAuthor)))
+	e.GET(GetAuthorByID, em.AuthMiddleware(author.GetAuthorByID))
 
-	e.POST(CreateCategory, category.CreateCategory)
-	e.GET(GetCategoryByID, category.GetCategoryByID)
+	e.POST(CreateCategory, em.AuthMiddleware(em.AdminOnlyMiddleware(category.CreateCategory)))
+	e.GET(GetCategoryByID, em.AuthMiddleware(category.GetCategoryByID))
 
-	e.POST(CreateBook, book.CreateBook)
-	e.GET(GetBookByID, book.GetBookByID)
-	e.GET(SearchBooks, book.SearchBooks)
+	e.POST(CreateBook, em.AuthMiddleware(em.AdminOnlyMiddleware(book.CreateBook)))
+	e.GET(GetBookByID, em.AuthMiddleware(book.GetBookByID))
+	e.GET(SearchBooks, em.AuthMiddleware(book.SearchBooks))
 
-	e.POST(BorrowBook, book.BorrowBook)
-	e.POST(ReturnBook, book.ReturnBook)
+	e.POST(BorrowBook, em.AuthMiddleware(book.BorrowBook))
+	e.POST(ReturnBook, em.AuthMiddleware(book.ReturnBook))
 }
