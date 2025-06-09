@@ -5,6 +5,9 @@ option go_package = "proto/bookpb";
 
 service BookService {
   rpc CreateBook(CreateBookRequest) returns (BookResponse);
+  rpc BorrowBook(BorrowBookRequest) returns (BorrowBookResponse);
+  rpc ReturnBook(BorrowBookRequest) returns (BorrowBookResponse);
+  rpc GetBookByID(GetBookByIDRequest) returns (BookResponse);
 };
 
 message CreateBookRequest {
@@ -38,3 +41,17 @@ message BookResponse {
   AuthorResponse author = 6;
   CategoryResponse category = 7;
 };
+
+message BorrowBookRequest {
+  string user_id = 1;
+  string book_id = 2;
+}
+
+message BorrowBookResponse {
+  bool success = 1;
+  string err = 2;
+}
+
+message GetBookByIDRequest {
+  string book_id = 1;
+}
